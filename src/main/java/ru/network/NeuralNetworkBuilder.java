@@ -47,12 +47,14 @@ public class NeuralNetworkBuilder {
             }
         };
 
-        public void setCoefficientTraining(double cTraining) {
+        public Builder setCoefficientTraining(double cTraining) {
             this.cTraining = cTraining;
+            return this;
         }
 
-        public void setUseLineChart(boolean useLineChart) {
+        public Builder setUseLineChart(boolean useLineChart) {
             this.useLineChart = useLineChart;
+            return this;
         }
 
         public Builder setFError(FError fError) {
@@ -80,12 +82,14 @@ public class NeuralNetworkBuilder {
             return this;
         }
 
-        public void setFActivation(FActivation fActivation) {
+        public Builder setFActivation(FActivation fActivation) {
             this.fActivation = fActivation;
+            return this;
         }
 
-        public void setFDifferenceActivation(FDifferenceActivation fDifferenceActivation) {
+        public Builder setFDifferenceActivation(FDifferenceActivation fDifferenceActivation) {
             this.fDifferenceActivation = fDifferenceActivation;
+            return this;
         }
 
         public Builder setCountHidden(int countHidden) {
