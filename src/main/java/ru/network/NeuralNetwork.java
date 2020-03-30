@@ -18,17 +18,17 @@ import java.util.List;
 
 public class NeuralNetwork implements Serializable {
     private static final long serialVersionUID = 6561671168938651613L;
-    static boolean useLineChart = true;
-    private LinkedList<List<Neuron>> neurons;
+    LinkedList<List<Neuron>> neurons;
     private transient LinkedList<double[]> trainSet = new LinkedList<>();
-    private transient double E = .8;
+    private transient double cTraining;
     private transient FError fError;
     private transient XYSeries series;
     private transient JFrame jFrame = new JFrame();
 
-    public NeuralNetwork(List<List<Neuron>> neurons, FError fError) {
+    public NeuralNetwork(List<List<Neuron>> neurons, FError fError, double cTraining, boolean useLineChart) {
         this.neurons = (LinkedList<List<Neuron>>) neurons;
         this.fError = fError;
+        this.cTraining = cTraining;
         if (useLineChart) {
             series = new XYSeries("Error");
             initUI();
@@ -85,25 +85,25 @@ public class NeuralNetwork implements Serializable {
         return xyLineChart;
     }
 
-    void calInputsAndOutputs() {
+    private void calInputsAndOutputs() {
         for (List<Neuron> n : neurons) {
             n.parallelStream().forEach(Neuron::calInput);
             n.parallelStream().forEach(Neuron::calOutput);
         }
     }
 
-    void calNeuronsError() {
+    private void calNeuronsError() {
         for (int i = neurons.size() - 1; i >= 0; i--) {
             neurons.get(i).parallelStream().forEach(Neuron::calError);
         }
     }
 
-    void changeWeights(int iteration, int j) {
+    private void changeWeights(int iteration, int j) {
         for (int i = neurons.size() - 1; i >= 0; i--) {
             neurons.get(i).parallelStream()
                     .forEach(neuron -> neuron.getInComingLinks()
                             .parallelStream()
-                            .forEach(l -> l.setWeight(l.getWeight() + E * neuron.getError() * l.getInNeuron().getOutput(), iteration, j)));
+                            .forEach(l -> l.setWeight(l.getWeight() + cTraining * neuron.getError() * l.getInNeuron().getOutput(), iteration, j)));
 
         }
     }
@@ -136,7 +136,7 @@ public class NeuralNetwork implements Serializable {
                 j++;
             }
             double v = errorSum / trainSet.size() * 2;
-            if (useLineChart && series != null) {
+            if (series != null) {
                 series.add(i, v * 100);
             }
             error = Math.min(error, v);

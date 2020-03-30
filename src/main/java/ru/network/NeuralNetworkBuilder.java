@@ -18,12 +18,13 @@ public class NeuralNetworkBuilder {
     public static class Builder implements Serializable {
 
         private static final long serialVersionUID = 2035167839116595998L;
-
+        private boolean useLineChart = false;
         private int countLayer = 2;
         private int countInput = 1;
         private int countOutput = 1;
         private int countHidden = 0;
         private boolean bias = false;
+        private transient double cTraining = .8;
         // Функция активации (Сигмоид)
         private FActivation fActivation = new FActivation() {
             @Override
@@ -45,6 +46,14 @@ public class NeuralNetworkBuilder {
                 return list.parallelStream().mapToDouble(n -> Math.pow(n.getTarget() - n.getOutput(), 2) / list.size()).sum();
             }
         };
+
+        public void setCoefficientTraining(double cTraining) {
+            this.cTraining = cTraining;
+        }
+
+        public void setUseLineChart(boolean useLineChart) {
+            this.useLineChart = useLineChart;
+        }
 
         public Builder setFError(FError fError) {
             this.fError = fError;
@@ -90,7 +99,7 @@ public class NeuralNetworkBuilder {
             createHiddenLayers(list);
             list.add(createNeurons(countOutput, false, NeuronType.OUTPUT));
             createLinks(list);
-            return new NeuralNetwork(list, fError);
+            return new NeuralNetwork(list, fError, cTraining, useLineChart);
         }
 
         private void createHiddenLayers(List<List<Neuron>> list) {
@@ -119,7 +128,7 @@ public class NeuralNetworkBuilder {
             for (int i = 0; i < list.size() - 1; i++) {
                 for (Neuron neuron : list.get(i)) {
                     for (Neuron neuron1 : list.get(i + 1).stream().filter(n -> !n.isBias()).collect(Collectors.toList())) {
-                        Link link = new Link(neuron, neuron1);
+                        Link link = new Link(neuron, neuron1, useLineChart);
                         neuron.addOutComingLinks(link);
                         neuron1.addInComingLinks(link);
                     }
