@@ -13,8 +13,11 @@ import ru.functions.FError;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class NeuralNetwork implements Serializable {
     private static final long serialVersionUID = 6561671168938651613L;
@@ -24,15 +27,23 @@ public class NeuralNetwork implements Serializable {
     private transient FError fError;
     private transient XYSeries series;
     private transient JFrame jFrame = new JFrame();
+    private ArrayList<Neuron> first;
+    private ArrayList<Neuron> last;
 
     public NeuralNetwork(List<List<Neuron>> neurons, FError fError, double cTraining, boolean useLineChart) {
         this.neurons = (LinkedList<List<Neuron>>) neurons;
+        first = ((LinkedList<List<Neuron>>) neurons).getFirst().stream().filter(x -> !x.isBias())
+                .collect(Collectors.toCollection(ArrayList::new));
+        last = (ArrayList<Neuron>) ((LinkedList<List<Neuron>>) neurons).getLast();
         this.fError = fError;
         this.cTraining = cTraining;
         if (useLineChart) {
             series = new XYSeries("Error");
             initUI();
-            EventQueue.invokeLater(() -> jFrame.setVisible(true));
+            EventQueue.invokeLater(() -> {
+                jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                jFrame.setVisible(true);
+            });
         }
     }
 
@@ -98,12 +109,12 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    private void changeWeights(int iteration, int j) {
+    private void changeWeights() {
         for (int i = neurons.size() - 1; i >= 0; i--) {
             neurons.get(i).parallelStream()
                     .forEach(neuron -> neuron.getInComingLinks()
                             .parallelStream()
-                            .forEach(l -> l.setWeight(l.getWeight() + cTraining * neuron.getError() * l.getInNeuron().getOutput(), iteration, j)));
+                            .forEach(l -> l.setWeight(l.getWeight() + cTraining * neuron.getError() * l.getInNeuron().getOutput())));
 
         }
     }
@@ -132,7 +143,7 @@ public class NeuralNetwork implements Serializable {
                 calInputsAndOutputs();
                 calNeuronsError();
                 errorSum += calError();
-                changeWeights(i * trainSet.size() + j, trainSet.size());
+                changeWeights();
                 j++;
             }
             double v = errorSum / trainSet.size() * 2;
@@ -147,31 +158,32 @@ public class NeuralNetwork implements Serializable {
     }
 
     public double[] getAnswer(double[] values) {
+        if (values.length != first.size()) {
+            throw new IllegalArgumentException("");
+        }
         setInputValues(values);
         calInputsAndOutputs();
         return neurons.getLast().stream().mapToDouble(Neuron::getOutput).toArray();
     }
 
+    private void checkTrainSet() {
+        for (int i = 0; i < trainSet.size(); i++) {
+            if (trainSet.get(i).length != first.size() || trainSet.get(i + 1).length != last.size()) {
+                throw new IllegalArgumentException("");
+            }
+            i++;
+        }
+    }
+
     private void setInputAndTargetValues(double[] values, double[] targetOutValues) {
         setInputValues(values);
-        List<Neuron> last = neurons.getLast();
-        if (targetOutValues.length != last.size()) {
-            throw new IllegalArgumentException("");
-        }
-
         for (int i = 0; i < last.size(); i++) {
             last.get(i).setTarget(targetOutValues[i]);
         }
     }
 
     private void setInputValues(double[] values) {
-        List<Neuron> first = neurons.getFirst();
-        long count = neurons.getFirst().stream().filter(x -> !x.isBias()).count();
-        if (values.length != count) {
-            throw new IllegalArgumentException("");
-        }
-
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < first.size(); i++) {
             first.get(i).setOutput(values[i]);
         }
     }
