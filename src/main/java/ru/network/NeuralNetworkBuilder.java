@@ -143,10 +143,10 @@ public class NeuralNetworkBuilder {
         private List<Neuron> createNeurons(int count, boolean allowedBias, NeuronType neuronType) {
             ArrayList<Neuron> neurons = new ArrayList<>();
             for (int i = 0; i < count; i++) {
-                neurons.add(new Neuron(neuronType, fActivation, fDifferenceActivation));
+                neurons.add(new Neuron(neuronType, fActivation, fDifferenceActivation, i));
             }
             if (bias && allowedBias) {
-                Neuron neuron = new Neuron(NeuronType.BIAS, fActivation, fDifferenceActivation);
+                Neuron neuron = new Neuron(NeuronType.BIAS, fActivation, fDifferenceActivation, count);
                 neuron.setOutput(1);
                 neurons.add(neuron);
             }

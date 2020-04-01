@@ -16,6 +16,7 @@ public class Neuron implements Serializable {
     private static final long serialVersionUID = 7814835293195643241L;
     private static transient int countNeurons = 0;
     private int number = 0;
+    private int numberOnLayer = 0;
     //Все входы нейрона
     private List<Link> inComingLinks = new ArrayList<>();
     //Все выходы нейрона
@@ -31,15 +32,16 @@ public class Neuron implements Serializable {
     private transient double error;
     private transient BufferedImage bufferedImage;
 
-    Neuron(NeuronType neuronType, FActivation fActivation, FDifferenceActivation fDifferenceActivation) {
+    Neuron(NeuronType neuronType, FActivation fActivation, FDifferenceActivation fDifferenceActivation, int numberOnLayer) {
         number = countNeurons++;
         this.fActivation = fActivation;
         this.neuronType = neuronType;
         this.fDifferenceActivation = fDifferenceActivation;
+        this.numberOnLayer = numberOnLayer;
     }
 
-    int getNumber() {
-        return number;
+    public int getNumberOnLayer() {
+        return numberOnLayer;
     }
 
     void createBufferedImage(int width, int height) {

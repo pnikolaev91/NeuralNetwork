@@ -14,33 +14,40 @@ public class CheckHorizontalAndVerticalLinesFrom3x3 {
 
     static class Training {
         public static void main(String[] args) throws IOException {
-            NeuralNetwork netWork = new NeuralNetworkBuilder.Builder().setUseLineChart(true).setCountInput(9).setCountOutput(2).setCountHidden(6).setCountLayer(4).setBias(true).toBuild();
+            NeuralNetwork netWork = new NeuralNetworkBuilder.Builder()
+                    .setUseLineChart(true)
+                    .setCountInput(9)
+                    .setCountOutput(2)
+                    .setCountHidden(6)
+                    .setCountLayer(4)
+                    .setBias(true)
+                    .toBuild();
             // Horizontal lines
-            netWork.addTrain(new double[]{1, 1, 1, 0, 0, 0, 0, 0, 0}, new double[]{.8, .2});
-            netWork.addTrain(new double[]{0, 0, 0, 1, 1, 1, 0, 0, 0}, new double[]{.8, .2});
-            netWork.addTrain(new double[]{0, 0, 0, 0, 0, 0, 1, 1, 1}, new double[]{.8, .2});
+            netWork.addTrain(new double[]{1, 1, 1, 0, 0, 0, 0, 0, 0}, new double[]{1, 0});
+            netWork.addTrain(new double[]{0, 0, 0, 1, 1, 1, 0, 0, 0}, new double[]{1, 0});
+            netWork.addTrain(new double[]{0, 0, 0, 0, 0, 0, 1, 1, 1}, new double[]{1, 0});
             // Vertical lines
-            netWork.addTrain(new double[]{1, 0, 0, 0, 1, 0, 0, 0, 1}, new double[]{.2, .8});
-            netWork.addTrain(new double[]{1, 0, 0, 0, 1, 0, 0, 0, 1}, new double[]{.2, .8});
-            netWork.addTrain(new double[]{1, 0, 0, 0, 1, 0, 0, 0, 1}, new double[]{.2, .8});
+            netWork.addTrain(new double[]{1, 0, 0, 1, 0, 0, 1, 0, 0}, new double[]{0, 1});
+            netWork.addTrain(new double[]{0, 1, 0, 0, 1, 0, 0, 1, 0}, new double[]{0, 1});
+            netWork.addTrain(new double[]{0, 0, 1, 0, 0, 1, 0, 0, 1}, new double[]{0, 1});
 
             // Horizontal & Vertical lines
-            netWork.addTrain(new double[]{1, 1, 1, 0, 1, 0, 0, 0, 1}, new double[]{.8, .8});
-            netWork.addTrain(new double[]{1, 1, 1, 0, 1, 0, 0, 0, 1}, new double[]{.8, .8});
-            netWork.addTrain(new double[]{1, 1, 1, 0, 1, 0, 0, 0, 1}, new double[]{.8, .8});
+            netWork.addTrain(new double[]{1, 1, 1, 1, 0, 0, 1, 0, 0}, new double[]{1, 1});
+            netWork.addTrain(new double[]{1, 1, 1, 0, 1, 0, 0, 1, 0}, new double[]{1, 1});
+            netWork.addTrain(new double[]{1, 1, 1, 0, 0, 1, 0, 0, 1}, new double[]{1, 1});
 
-            netWork.addTrain(new double[]{1, 0, 0, 1, 1, 1, 0, 0, 1}, new double[]{.8, .8});
-            netWork.addTrain(new double[]{1, 0, 0, 1, 1, 1, 0, 0, 1}, new double[]{.8, .8});
-            netWork.addTrain(new double[]{1, 0, 0, 1, 1, 1, 0, 0, 1}, new double[]{.8, .8});
+            netWork.addTrain(new double[]{1, 0, 0, 1, 1, 1, 1, 0, 0}, new double[]{1, 1});
+            netWork.addTrain(new double[]{0, 1, 0, 1, 1, 1, 0, 1, 0}, new double[]{1, 1});
+            netWork.addTrain(new double[]{0, 0, 1, 1, 1, 1, 0, 0, 1}, new double[]{1, 1});
 
-            netWork.addTrain(new double[]{1, 0, 0, 0, 1, 0, 1, 1, 1}, new double[]{.8, .8});
-            netWork.addTrain(new double[]{1, 0, 0, 0, 1, 0, 1, 1, 1}, new double[]{.8, .8});
-            netWork.addTrain(new double[]{1, 0, 0, 0, 1, 0, 1, 1, 1}, new double[]{.8, .8});
+            netWork.addTrain(new double[]{1, 0, 0, 1, 0, 0, 1, 1, 1}, new double[]{1, 1});
+            netWork.addTrain(new double[]{0, 1, 0, 0, 1, 0, 1, 1, 1}, new double[]{1, 1});
+            netWork.addTrain(new double[]{0, 0, 1, 0, 0, 1, 1, 1, 1}, new double[]{1, 1});
 
             // No lines
-            netWork.addTrain(new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0}, new double[]{.2, .2});
+            netWork.addTrain(new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0}, new double[]{0, 0});
 
-            netWork.training(3000, 0.02);
+            netWork.training(10000, 0.005);
             netWork.save(fileName);
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{1, 0, 0, 0, 1, 0, 1, 1, 1})));
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0})));
@@ -51,7 +58,12 @@ public class CheckHorizontalAndVerticalLinesFrom3x3 {
         public static void main(String[] args) throws IOException, ClassNotFoundException {
             NeuralNetwork netWork = NeuralNetwork.init(fileName);
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{1, 0, 0, 0, 1, 0, 1, 1, 1})));
+
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0})));
+
+            LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{0, 0, 1, 0, 0, 1, 0, 0, 1})));
+
+            LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{0, 0, 0, 1, 1, 1, 0, 0, 0})));
         }
     }
 }

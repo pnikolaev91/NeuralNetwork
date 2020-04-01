@@ -14,12 +14,19 @@ public class ExclusiveOR {
 
     static class Training {
         public static void main(String[] args) throws IOException {
-            NeuralNetwork netWork = new NeuralNetworkBuilder.Builder().setCountInput(2).setCountOutput(1).setCountHidden(2).setCountLayer(3).setBias(true).toBuild();
-            netWork.addTrain(new double[]{0, 0}, new double[]{.2});
-            netWork.addTrain(new double[]{0, 1}, new double[]{.8});
-            netWork.addTrain(new double[]{1, 0}, new double[]{.8});
-            netWork.addTrain(new double[]{1, 1}, new double[]{.2});
-            netWork.training(3000, 0.02);
+            NeuralNetwork netWork = new NeuralNetworkBuilder.Builder()
+                    .setUseLineChart(true)
+                    .setCountInput(2)
+                    .setCountOutput(1)
+                    .setCountHidden(2)
+                    .setCountLayer(3)
+                    .setCoefficientTraining(.8)
+                    .setBias(true).toBuild();
+            netWork.addTrain(new double[]{0, 0}, new double[]{0});
+            netWork.addTrain(new double[]{0, 1}, new double[]{1});
+            netWork.addTrain(new double[]{1, 0}, new double[]{1});
+            netWork.addTrain(new double[]{1, 1}, new double[]{0});
+            netWork.training(10000, 0.002);
             netWork.save(fileName);
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{1, 0})));
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{1, 1})));
