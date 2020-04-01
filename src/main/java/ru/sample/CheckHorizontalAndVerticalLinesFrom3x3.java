@@ -14,7 +14,7 @@ public class CheckHorizontalAndVerticalLinesFrom3x3 {
 
     static class Training {
         public static void main(String[] args) throws IOException {
-            NeuralNetwork netWork = new NeuralNetworkBuilder.Builder().setCountInput(9).setCountOutput(2).setCountHidden(6).setCountLayer(4).setBias(true).toBuild();
+            NeuralNetwork netWork = new NeuralNetworkBuilder.Builder().setUseLineChart(true).setCountInput(9).setCountOutput(2).setCountHidden(6).setCountLayer(4).setBias(true).toBuild();
             // Horizontal lines
             netWork.addTrain(new double[]{1, 1, 1, 0, 0, 0, 0, 0, 0}, new double[]{.8, .2});
             netWork.addTrain(new double[]{0, 0, 0, 1, 1, 1, 0, 0, 0}, new double[]{.8, .2});

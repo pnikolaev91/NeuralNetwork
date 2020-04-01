@@ -15,6 +15,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class NeuralNetwork implements Serializable {
     private static final long serialVersionUID = 6561671168938651613L;
@@ -32,7 +33,10 @@ public class NeuralNetwork implements Serializable {
         if (useLineChart) {
             series = new XYSeries("Error");
             initUI();
-            EventQueue.invokeLater(() -> jFrame.setVisible(true));
+            EventQueue.invokeLater(() -> {
+                jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                jFrame.setVisible(true);
+            });
         }
     }
 
@@ -98,12 +102,12 @@ public class NeuralNetwork implements Serializable {
         }
     }
 
-    private void changeWeights(int iteration, int j) {
+    private void changeWeights(int iteration) {
         for (int i = neurons.size() - 1; i >= 0; i--) {
             neurons.get(i).parallelStream()
                     .forEach(neuron -> neuron.getInComingLinks()
                             .parallelStream()
-                            .forEach(l -> l.setWeight(l.getWeight() + cTraining * neuron.getError() * l.getInNeuron().getOutput(), iteration, j)));
+                            .forEach(l -> l.setWeight(l.getWeight() + cTraining * neuron.getError() * l.getInNeuron().getOutput())));
 
         }
     }
@@ -132,7 +136,7 @@ public class NeuralNetwork implements Serializable {
                 calInputsAndOutputs();
                 calNeuronsError();
                 errorSum += calError();
-                changeWeights(i * trainSet.size() + j, trainSet.size());
+                changeWeights(i * trainSet.size() + j);
                 j++;
             }
             double v = errorSum / trainSet.size() * 2;
@@ -140,9 +144,39 @@ public class NeuralNetwork implements Serializable {
                 series.add(i, v * 100);
             }
             error = Math.min(error, v);
-            if (Math.abs(v) < minError) {
+            if (Math.abs(v) < minError || counters - 1 == i) {
+                int max = 1000;
+                neurons.parallelStream().forEach(l -> l.parallelStream().forEach(n -> n.createBufferedImage(max, max)));
+                long st, en;
+                st = System.nanoTime();
+                for (int j = 1; j < max; j++) {
+                    for (int k = 1; k < max; k++) {
+                        int finalK = k;
+                        int finalJ = j;
+                        setInputValues(new double[]{j, k});
+                        calInputsAndOutputs();
+                        neurons.getLast().parallelStream().forEach(n -> n.setPixel(finalJ, finalK));
+                    }
+                }
+                en = System.nanoTime();
+                System.out.println(TimeUnit.SECONDS.convert(en - st, TimeUnit.NANOSECONDS));
+//                for (int j = 0; j < trainSet.size() - 1; j++) {
+//                    int finalJ = j;
+//                    neurons.parallelStream().forEach(l -> l.parallelStream().forEach(n -> {
+//                        if (trainSet.get(finalJ + 1)[0] == 0) {
+//                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.WHITE.getRGB());
+//                        } else {
+//                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.blue.getRGB());
+//                        }
+//                    }))
+//                    ;
+//                    j++;
+//                }
+                int finalI = i;
+                neurons.parallelStream().forEach(l -> l.parallelStream().forEach(n -> n.saveBufferedImage(finalI)));
                 return;
             }
+
         }
     }
 
@@ -166,12 +200,8 @@ public class NeuralNetwork implements Serializable {
 
     private void setInputValues(double[] values) {
         List<Neuron> first = neurons.getFirst();
-        long count = neurons.getFirst().stream().filter(x -> !x.isBias()).count();
-        if (values.length != count) {
-            throw new IllegalArgumentException("");
-        }
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < first.size() - 1; i++) {
             first.get(i).setOutput(values[i]);
         }
     }

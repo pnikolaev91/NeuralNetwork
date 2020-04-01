@@ -24,7 +24,7 @@ public class NeuralNetworkBuilder {
         private int countOutput = 1;
         private int countHidden = 0;
         private boolean bias = false;
-        private transient double cTraining = .8;
+        private transient double cTraining = .1;
         // Функция активации (Сигмоид)
         private FActivation fActivation = new FActivation() {
             @Override
@@ -132,7 +132,7 @@ public class NeuralNetworkBuilder {
             for (int i = 0; i < list.size() - 1; i++) {
                 for (Neuron neuron : list.get(i)) {
                     for (Neuron neuron1 : list.get(i + 1).stream().filter(n -> !n.isBias()).collect(Collectors.toList())) {
-                        Link link = new Link(neuron, neuron1, useLineChart);
+                        Link link = new Link(neuron, neuron1);
                         neuron.addOutComingLinks(link);
                         neuron1.addInComingLinks(link);
                     }
