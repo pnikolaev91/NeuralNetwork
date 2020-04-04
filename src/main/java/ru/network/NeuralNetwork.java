@@ -16,13 +16,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class NeuralNetwork implements Serializable {
     private static final long serialVersionUID = 6561671168938651613L;
     LinkedList<List<Neuron>> neurons;
-    private transient LinkedList<double[]> trainSet = new LinkedList<>();
+    private transient LinkedList<double[]> trainset = new LinkedList<>();
     private transient double cTraining;
     private transient FError fError;
     private transient XYSeries series;
@@ -130,23 +129,24 @@ public class NeuralNetwork implements Serializable {
         if (targetOutValues == null || targetOutValues.length == 0) {
             throw new IllegalArgumentException("");
         }
-        trainSet.add(values);
-        trainSet.add(targetOutValues);
+        trainset.add(values);
+        trainset.add(targetOutValues);
     }
 
     public void training(int counters, double minError) {
         double error = 100;
+        checkTrainSet();
         for (int i = 0; i < counters; i++) {
             double errorSum = 0;
-            for (int j = 0; j < trainSet.size() - 1; j++) {
-                setInputAndTargetValues(trainSet.get(j), trainSet.get(j + 1));
+            for (int j = 0; j < trainset.size() - 1; j++) {
+                setInputAndTargetValues(trainset.get(j), trainset.get(j + 1));
                 calInputsAndOutputs();
                 calNeuronsError();
                 errorSum += calError();
                 changeWeights();
                 j++;
             }
-            double v = errorSum / trainSet.size() * 2;
+            double v = errorSum / trainset.size() * 2;
             if (series != null) {
                 series.add(i, v * 100);
             }
@@ -167,8 +167,8 @@ public class NeuralNetwork implements Serializable {
     }
 
     private void checkTrainSet() {
-        for (int i = 0; i < trainSet.size(); i++) {
-            if (trainSet.get(i).length != first.size() || trainSet.get(i + 1).length != last.size()) {
+        for (int i = 0; i < trainset.size(); i++) {
+            if (trainset.get(i).length != first.size() || trainset.get(i + 1).length != last.size()) {
                 throw new IllegalArgumentException("");
             }
             i++;
