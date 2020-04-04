@@ -136,7 +136,8 @@ public class NeuralNetwork implements Serializable {
 
     public void training(int counters, double minError) {
         double error = 100;
-        for (int i = 0; i < counters; i++) {
+        checkTrainSet();
+        for (int i = 0; i < (counters != 0 ? counters : 1000000); i++) {
             double errorSum = 0;
             for (int j = 0; j < trainSet.size() - 1; j++) {
                 setInputAndTargetValues(trainSet.get(j), trainSet.get(j + 1));
@@ -152,10 +153,8 @@ public class NeuralNetwork implements Serializable {
             }
             error = Math.min(error, v);
             if (Math.abs(v) < minError || counters - 1 == i) {
-                int max = 1000;
-                neurons.parallelStream().forEach(l -> l.parallelStream().forEach(n -> n.createBufferedImage(max, max)));
-                long st, en;
-                st = System.nanoTime();
+                int max = 100;
+                neurons.getLast().parallelStream().forEach(n -> n.createBufferedImage(max, max));
                 for (int j = 1; j < max; j++) {
                     for (int k = 1; k < max; k++) {
                         int finalK = k;
@@ -165,22 +164,20 @@ public class NeuralNetwork implements Serializable {
                         neurons.getLast().parallelStream().forEach(n -> n.setPixel(finalJ, finalK));
                     }
                 }
-                en = System.nanoTime();
-                System.out.println(TimeUnit.SECONDS.convert(en - st, TimeUnit.NANOSECONDS));
-//                for (int j = 0; j < trainSet.size() - 1; j++) {
-//                    int finalJ = j;
-//                    neurons.parallelStream().forEach(l -> l.parallelStream().forEach(n -> {
-//                        if (trainSet.get(finalJ + 1)[0] == 0) {
-//                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.WHITE.getRGB());
-//                        } else {
-//                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.blue.getRGB());
-//                        }
-//                    }))
-//                    ;
-//                    j++;
-//                }
+                for (int j = 0; j < trainSet.size() - 1; j++) {
+                    int finalJ = j;
+                    neurons.getLast().forEach(n -> {
+                        if (trainSet.get(finalJ + 1)[0] == 0) {
+                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.WHITE.getRGB());
+                        } else {
+                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.blue.getRGB());
+                        }
+                    })
+                    ;
+                    j++;
+                }
                 int finalI = i;
-                neurons.parallelStream().forEach(l -> l.parallelStream().forEach(n -> n.saveBufferedImage(finalI)));
+                neurons.getLast().parallelStream().forEach(n -> n.saveBufferedImage(finalI));
                 return;
             }
         }
