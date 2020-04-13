@@ -23,27 +23,27 @@ public class NeuralNetworkBuilder {
         private int countInput = 1;
         private int countOutput = 1;
         private int countHidden = 0;
-        private boolean bias = false;
+        private boolean bias = true;
         private transient double cTraining = .1;
         // Функция активации (Сигмоид)
         private FActivation fActivation = new FActivation() {
             @Override
-            public double get(Neuron n) {
-                return 1 / (1 + Math.exp(-n.getInput()));
+            public double get(double v) {
+                return 1 / (1 + Math.exp(-v));
             }
         };
         // Логистическая функция для сигмойда
         private FDifferenceActivation fDifferenceActivation = new FDifferenceActivation() {
             @Override
-            public double get(Neuron n) {
-                return (1 - n.getOutput()) * n.getOutput();
+            public double get(double v) {
+                return (1 - v) * v;
             }
         };
         // Функция ошибки
         private FError fError = new FError() {
             @Override
             public double get(List<Neuron> list) {
-                return list.parallelStream().mapToDouble(n -> Math.pow(n.getTarget() - n.getOutput(), 2) / list.size()).sum();
+                return list.stream().mapToDouble(n -> Math.pow(n.getTarget() - n.getOutput(), 2) / list.size()).sum();
             }
         };
 

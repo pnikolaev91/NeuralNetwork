@@ -47,7 +47,7 @@ public class CheckHorizontalAndVerticalLinesFrom3x3 {
             // No lines
             netWork.addTrain(new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0}, new double[]{0, 0});
 
-            netWork.training(10000, 0.005);
+            netWork.training(100000, 0.005);
             netWork.save(fileName);
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{1, 0, 0, 0, 1, 0, 1, 1, 1})));
             LOGGER.info(Arrays.toString(netWork.getAnswer(new double[]{0, 0, 0, 0, 0, 0, 0, 0, 0})));

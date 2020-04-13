@@ -16,7 +16,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class NeuralNetwork implements Serializable {
@@ -97,25 +96,22 @@ public class NeuralNetwork implements Serializable {
     }
 
     private void calInputsAndOutputs() {
-        for (List<Neuron> n : neurons) {
-            n.parallelStream().forEach(Neuron::calInput);
-            n.parallelStream().forEach(Neuron::calOutput);
+        for (int i = 1; i < neurons.size(); i++) {
+            neurons.get(i).forEach(Neuron::calOutput);
         }
     }
 
     private void calNeuronsError() {
-        for (int i = neurons.size() - 1; i >= 0; i--) {
-            neurons.get(i).parallelStream().forEach(Neuron::calError);
+        neurons.getLast().forEach(Neuron::calErrorOutput);
+        for (int i = neurons.size() - 2; i >= 1; i--) {
+            neurons.get(i).forEach(Neuron::calError);
         }
     }
 
     private void changeWeights() {
         for (int i = neurons.size() - 1; i >= 0; i--) {
-            neurons.get(i).parallelStream()
-                    .forEach(neuron -> neuron.getInComingLinks()
-                            .parallelStream()
-                            .forEach(l -> l.setWeight(l.getWeight() + cTraining * neuron.getError() * l.getInNeuron().getOutput())));
-
+            neurons.get(i).forEach(neuron -> neuron.getInComingLinks()
+                    .forEach(l -> l.setWeight(l.getWeight() + cTraining * neuron.getError() * l.getInNeuron().getOutput())));
         }
     }
 
@@ -153,34 +149,16 @@ public class NeuralNetwork implements Serializable {
             }
             error = Math.min(error, v);
             if (Math.abs(v) < minError || counters - 1 == i) {
-                int max = 100;
-                neurons.getLast().parallelStream().forEach(n -> n.createBufferedImage(max, max));
-                for (int j = 1; j < max; j++) {
-                    for (int k = 1; k < max; k++) {
-                        int finalK = k;
-                        int finalJ = j;
-                        setInputValues(new double[]{j, k});
-                        calInputsAndOutputs();
-                        neurons.getLast().parallelStream().forEach(n -> n.setPixel(finalJ, finalK));
-                    }
-                }
-                for (int j = 0; j < trainSet.size() - 1; j++) {
-                    int finalJ = j;
-                    neurons.getLast().forEach(n -> {
-                        if (trainSet.get(finalJ + 1)[0] == 0) {
-                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.WHITE.getRGB());
-                        } else {
-                            n.setPixel((int) trainSet.get(finalJ)[0], (int) (trainSet.get(finalJ)[1]), Color.blue.getRGB());
-                        }
-                    })
-                    ;
-                    j++;
-                }
-                int finalI = i;
-                neurons.getLast().parallelStream().forEach(n -> n.saveBufferedImage(finalI));
                 return;
             }
         }
+    }
+
+    public void backpropagation(double[] inputs, double[] target) {
+        setInputAndTargetValues(inputs, target);
+        calInputsAndOutputs();
+        calNeuronsError();
+        changeWeights();
     }
 
     public double[] getAnswer(double[] values) {
