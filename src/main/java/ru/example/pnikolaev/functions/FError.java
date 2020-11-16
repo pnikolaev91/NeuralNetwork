@@ -1,6 +1,6 @@
-package ru.functions;
+package ru.example.pnikolaev.functions;
 
-import ru.network.Neuron;
+import ru.example.pnikolaev.network.Neuron;
 
 import java.io.Serializable;
 import java.util.List;

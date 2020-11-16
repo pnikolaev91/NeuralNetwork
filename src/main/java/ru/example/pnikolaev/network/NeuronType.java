@@ -1,4 +1,4 @@
-package ru.network;
+package ru.example.pnikolaev.network;
 
 public enum NeuronType {
     INPUT("input"),
