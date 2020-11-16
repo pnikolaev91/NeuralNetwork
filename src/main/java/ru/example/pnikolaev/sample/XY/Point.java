@@ -1,4 +1,4 @@
-package ru.sample.XY;
+package ru.example.pnikolaev.sample.XY;
 
 public class Point {
 

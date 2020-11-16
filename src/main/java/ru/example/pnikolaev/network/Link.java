@@ -1,7 +1,7 @@
-package ru.network;
+package ru.example.pnikolaev.network;
 
 import java.io.Serializable;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Link implements Serializable {
     private static final long serialVersionUID = -8684841368510392034L;
@@ -12,10 +12,13 @@ public class Link implements Serializable {
     Link(Neuron inNeuron, Neuron outNeuron) {
         this.inNeuron = inNeuron;
         this.outNeuron = outNeuron;
+        inNeuron.addOutComingLinks(this);
+        outNeuron.addInComingLinks(this);
+        double aDouble = ThreadLocalRandom.current().nextDouble();
         if (outNeuron.getNeuronType().equals(NeuronType.OUTPUT)) {
-            setWeight(Math.random() - 0.5);
+            setWeight(aDouble - 0.5);
         } else {
-            setWeight(Math.random() * (new Random().nextBoolean() ? 1 : -1));
+            setWeight(aDouble * (ThreadLocalRandom.current().nextBoolean() ? 1 : -1));
         }
     }
 
@@ -23,16 +26,8 @@ public class Link implements Serializable {
         return inNeuron;
     }
 
-    void setInNeuron(Neuron inNeuron) {
-        this.inNeuron = inNeuron;
-    }
-
     Neuron getOutNeuron() {
         return outNeuron;
-    }
-
-    void setOutNeuron(Neuron outNeuron) {
-        this.outNeuron = outNeuron;
     }
 
     double getWeight() {

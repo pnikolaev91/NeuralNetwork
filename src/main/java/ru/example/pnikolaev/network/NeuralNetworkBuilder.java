@@ -1,12 +1,11 @@
-package ru.network;
+package ru.example.pnikolaev.network;
 
-import ru.functions.FActivation;
-import ru.functions.FDifferenceActivation;
-import ru.functions.FError;
+import ru.example.pnikolaev.functions.FActivation;
+import ru.example.pnikolaev.functions.FDifferenceActivation;
+import ru.example.pnikolaev.functions.FError;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,12 +17,13 @@ public class NeuralNetworkBuilder {
     public static class Builder implements Serializable {
 
         private static final long serialVersionUID = 2035167839116595998L;
-        private boolean useLineChart = false;
         private int countLayer = 2;
         private int countInput = 1;
         private int countOutput = 1;
         private int countHidden = 0;
         private boolean bias = true;
+        private boolean monitoring = false;
+
         private transient double cTraining = .1;
         // Функция активации (Сигмоид)
         private FActivation fActivation = new FActivation() {
@@ -52,10 +52,6 @@ public class NeuralNetworkBuilder {
             return this;
         }
 
-        public Builder setUseLineChart(boolean useLineChart) {
-            this.useLineChart = useLineChart;
-            return this;
-        }
 
         public Builder setFError(FError fError) {
             this.fError = fError;
@@ -97,13 +93,19 @@ public class NeuralNetworkBuilder {
             return this;
         }
 
+        public Builder setMonitoring(boolean monitoring) {
+            this.monitoring = monitoring;
+            return this;
+        }
+
         public NeuralNetwork toBuild() {
-            LinkedList<List<Neuron>> list = new LinkedList<>();
+            ArrayList<List<Neuron>> list = new ArrayList<>();
             list.add(createNeurons(countInput, true, NeuronType.INPUT));
             createHiddenLayers(list);
             list.add(createNeurons(countOutput, false, NeuronType.OUTPUT));
             createLinks(list);
-            return new NeuralNetwork(list, fError, cTraining, useLineChart);
+            NeuralNetworkImpl nn = new NeuralNetworkImpl(list, fError, cTraining);
+            return monitoring ? new NeuralNetworkMonitorMSE(nn) : nn;
         }
 
         private void createHiddenLayers(List<List<Neuron>> list) {
@@ -132,9 +134,7 @@ public class NeuralNetworkBuilder {
             for (int i = 0; i < list.size() - 1; i++) {
                 for (Neuron neuron : list.get(i)) {
                     for (Neuron neuron1 : list.get(i + 1).stream().filter(n -> !n.isBias()).collect(Collectors.toList())) {
-                        Link link = new Link(neuron, neuron1);
-                        neuron.addOutComingLinks(link);
-                        neuron1.addInComingLinks(link);
+                        new Link(neuron, neuron1);
                     }
                 }
             }
@@ -143,10 +143,10 @@ public class NeuralNetworkBuilder {
         private List<Neuron> createNeurons(int count, boolean allowedBias, NeuronType neuronType) {
             ArrayList<Neuron> neurons = new ArrayList<>();
             for (int i = 0; i < count; i++) {
-                neurons.add(new Neuron(neuronType, fActivation, fDifferenceActivation, i));
+                neurons.add(new Neuron(neuronType, fActivation, fDifferenceActivation));
             }
             if (bias && allowedBias) {
-                Neuron neuron = new Neuron(NeuronType.BIAS, fActivation, fDifferenceActivation, count);
+                Neuron neuron = new Neuron(NeuronType.BIAS, fActivation, fDifferenceActivation);
                 neuron.setOutput(1);
                 neurons.add(neuron);
             }

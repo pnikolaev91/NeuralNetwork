@@ -1,4 +1,4 @@
-package ru.functions;
+package ru.example.pnikolaev.functions;
 
 import java.io.Serializable;
 

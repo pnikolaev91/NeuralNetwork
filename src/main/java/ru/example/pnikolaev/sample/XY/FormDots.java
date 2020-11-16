@@ -1,7 +1,7 @@
-package ru.sample.XY;
+package ru.example.pnikolaev.sample.XY;
 
-import ru.network.NeuralNetwork;
-import ru.network.NeuralNetworkBuilder;
+import ru.example.pnikolaev.network.NeuralNetwork;
+import ru.example.pnikolaev.network.NeuralNetworkBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class FormDots extends JFrame implements Runnable, MouseListener {
 
@@ -18,11 +19,10 @@ public class FormDots extends JFrame implements Runnable, MouseListener {
 
     private BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
     private BufferedImage pimg = new BufferedImage(w / 8, h / 8, BufferedImage.TYPE_INT_RGB);
-    private int frame = 0;
 
     private NeuralNetwork nn;
 
-    public List<Point> points = new ArrayList<>();
+    private List<ru.example.pnikolaev.sample.XY.Point> points = new ArrayList<>();
 
     public FormDots() {
         nn = new NeuralNetworkBuilder.Builder()
@@ -41,6 +41,11 @@ public class FormDots extends JFrame implements Runnable, MouseListener {
         addMouseListener(this);
     }
 
+    public static void main(String[] args) {
+        FormDots f = new FormDots();
+        new Thread(f).start();
+    }
+
     @Override
     public void run() {
         while (true) {
@@ -52,13 +57,13 @@ public class FormDots extends JFrame implements Runnable, MouseListener {
     public void paint(Graphics g) {
         if (points.size() > 0) {
             for (int k = 0; k < 10000; k++) {
-                Point p = points.get((int) (Math.random() * points.size()));
+                ru.example.pnikolaev.sample.XY.Point p = points.get((int) (ThreadLocalRandom.current().nextDouble() * points.size()));
                 double nx = (double) p.x / w - 0.5;
                 double ny = (double) p.y / h - 0.5;
                 double[] targets = new double[2];
                 if (p.type == 0) targets[0] = 1;
                 else targets[1] = 1;
-                nn.backpropagation(new double[]{nx, ny}, targets);
+                nn.backPropagation(new double[]{nx, ny}, targets);
             }
         }
         for (int i = 0; i < w / 8; i++) {
@@ -76,7 +81,7 @@ public class FormDots extends JFrame implements Runnable, MouseListener {
         }
         Graphics ig = img.getGraphics();
         ig.drawImage(pimg, 0, 0, w, h, this);
-        for (Point p : points) {
+        for (ru.example.pnikolaev.sample.XY.Point p : points) {
             ig.setColor(Color.WHITE);
             ig.fillOval(p.x - 3, p.y - 3, 26, 26);
             if (p.type == 0) ig.setColor(Color.GREEN);
@@ -84,7 +89,6 @@ public class FormDots extends JFrame implements Runnable, MouseListener {
             ig.fillOval(p.x, p.y, 20, 20);
         }
         g.drawImage(img, 8, 30, w, h, this);
-        frame++;
     }
 
     @Override
