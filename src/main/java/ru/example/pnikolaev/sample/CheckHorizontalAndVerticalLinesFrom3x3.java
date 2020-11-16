@@ -22,6 +22,7 @@ public class CheckHorizontalAndVerticalLinesFrom3x3 {
                     .setCountHidden(9)
                     .setCountLayer(3)
                     .setCoefficientTraining(.3)
+                    .setMonitoring(true)
                     .setBias(true)
                     .toBuild();
 
